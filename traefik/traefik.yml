@@ -1,0 +1,28 @@
+entryPoints:
+  web:
+    address: :80
+    http3: {}
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: websecure
+  websecure:
+    address: :443
+    http3: {}
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: traefik-proxy
+
+api:
+  insecure: true
+
+certificatesResolvers:
+  le:
+    acme:
+      email: YOUR_EMAIL@gmail.com # Изменить на свою почту, которая указывается при выпуске сертификатов
+      storage: /le/acme.json
+      httpChallenge:
+        entryPoint: web

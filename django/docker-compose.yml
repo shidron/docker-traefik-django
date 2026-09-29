@@ -1,0 +1,35 @@
+name: django-app1
+services:
+  django-app1:
+    container_name: django-app1
+    restart: always
+    build: ./application/project/ # project - папка проекта
+    image: local/django-app1
+    networks:
+      - pgsql-internal
+      - traefik-proxy
+    volumes:
+      - ./application/media:/app/media
+      - ./application/static:/app/static
+    expose:
+      - 8000
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-proxy
+      - traefik.http.middlewares.django-app1-secure.redirectscheme.scheme=https
+      - traefik.http.routers.django-app1.entrypoints=web
+      - traefik.http.routers.django-app1.middlewares=django-app1-secure@docker
+      - traefik.http.routers.django-app1.rule=Host(`django-app1.example-domain.ru`)
+      - traefik.http.routers.django-app1-secure.entrypoints=websecure
+      - traefik.http.routers.django-app1-secure.rule=Host(`django-app1.example-domain.ru`)
+      - traefik.http.routers.django-app1-secure.tls=true
+      - traefik.http.routers.django-app1-secure.tls.certresolver=le
+      - traefik.http.services.django-app1.loadbalancer.server.port=8000
+
+networks:
+  pgsql-internal:
+    name: pgsql-internal
+    internal: true
+  traefik-proxy:
+    name: traefik-proxy
+    external: true
